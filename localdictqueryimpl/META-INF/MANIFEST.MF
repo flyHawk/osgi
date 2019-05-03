@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Localdictqueryimpl
+Bundle-SymbolicName: localdictqueryimpl
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: it.flyhawk.localdictquery.LocalDictQueryActivator
+Bundle-Vendor: it.flyhawk
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: it.flyhawk.dictquery,
+ org.osgi.framework;version="1.3.0"
+Automatic-Module-Name: localdictqueryimpl

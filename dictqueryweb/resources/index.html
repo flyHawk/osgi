@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>dictionary query</title>
+<script type="text/javascript">
+	function doSubmit() {
+		v_word = $("#word").val();
+		if (v_word.trim() == "") {
+			alert("Pls input searched word!")
+		} else {
+			$.ajax({
+				url : '/query.do',
+				type : 'post',
+				data : {
+					"word" : v_word
+				},
+				success : function(response) {
+					$("#showMsg").text(response);
+				},
+				error : function(req, textStatus, errorThrown) {
+					alert(textStatus + " " + errorThrown);
+				}
+			});
+		}
+	}
+</script>
+</head>
+<body>
+	<h3>Dictionary Query Service</h3>
+	Searched Word:
+	<input type="text" name="word" id="word" />
+	<input type="button" value="search" onclick="doSubmit();" />
+	<br/>
+	<span id="showMsg"></span>
+</body>
+<script type="text/javascript" src="/js/jquery-1.10.1.min.js"></script>
+</html>
