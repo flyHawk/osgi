@@ -13,37 +13,27 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-
+import org.osgi.util.tracker.ServiceTracker;
 import it.flyhawk.dictquery.DictQueryService;
 
-public class QueryServlet extends HttpServlet implements ServiceListener {
+public class QueryServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 
 	private BundleContext context;
 
-	private ServiceReference<?> m_ref = null;
-	private DictQueryService dictQueryService;
+	private ServiceTracker m_tracker = null;
 
 	public QueryServlet(BundleContext context) {
 		this.context = context;
 	}
 
 	public void init() throws ServletException {
-		synchronized (this) {
-			try {
-				context.addServiceListener(this,
-						"(&(objectClass=" + DictQueryService.class.getName() + ")" + "(queryType=*))");
-				ServiceReference<?>[] refs = null;
-				refs = context.getServiceReferences(DictQueryService.class.getName(), "(queryType=*)");
-				if (refs != null) {
-					m_ref = refs[0];
-					dictQueryService = (DictQueryService) context.getService(m_ref);
-				}
-			} catch (InvalidSyntaxException e) {
-				e.printStackTrace();
-			}
-
+		try {
+			m_tracker = new ServiceTracker(context, context.createFilter("(&(objectClass=" + DictQueryService.class.getName() + ")" + "(queryType=*))"), null);
+			m_tracker.open();
+		} catch (InvalidSyntaxException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -52,10 +42,13 @@ public class QueryServlet extends HttpServlet implements ServiceListener {
 		String word = req.getParameter("word");
 		String result = "";
 
-		if (dictQueryService != null) {
+		// 当有多个可用服务时，随机选择一个
+		DictQueryService dictQueryService = (DictQueryService)m_tracker.getService();
+		if(dictQueryService!=null) {
+			// 当没有服务可用时，返回为null，因此需要判断是否为空。
 			result = dictQueryService.queryWord(word);
-		} else {
-			result = "No QueryService Avaliable.";
+		}else {
+			result = "No DictQueryService Avaliable!";
 		}
 
 		PrintWriter pw = new PrintWriter(resp.getOutputStream());
@@ -69,39 +62,6 @@ public class QueryServlet extends HttpServlet implements ServiceListener {
 	}
 
 	public void destroy() {
-		if (m_ref != null) {
-			context.ungetService(m_ref);
-		}
-		if (dictQueryService != null) {
-			dictQueryService = null;
-		}
-	}
-
-	@Override
-	public synchronized void serviceChanged(ServiceEvent event) {
-
-		if (event.getType() == ServiceEvent.REGISTERED) {
-			if (m_ref == null) {
-				m_ref = event.getServiceReference();
-				dictQueryService = (DictQueryService) context.getService(m_ref);
-			}
-		} else if (event.getType() == ServiceEvent.UNREGISTERING) {
-			if (event.getServiceReference() == m_ref) {
-				context.ungetService(m_ref);
-				m_ref = null;
-				dictQueryService = null;
-
-				ServiceReference<?>[] refs = null;
-				try {
-					refs = context.getServiceReferences(DictQueryService.class.getName(), "(queryType=*)");
-				} catch (InvalidSyntaxException e) {
-					e.printStackTrace();
-				}
-				if (refs != null) {
-					m_ref = refs[0];
-					dictQueryService = (DictQueryService) context.getService(m_ref);
-				}
-			}
-		}
+		m_tracker.close();
 	}
 }
