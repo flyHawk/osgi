@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Dictqueryweb
 Bundle-SymbolicName: dictqueryweb
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: it.flyahwk.dictqueryweb.Activator
 Bundle-Vendor: it.flyhawk
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: it.flyhawk.dictquery,
@@ -13,3 +12,5 @@ Import-Package: it.flyhawk.dictquery,
  org.osgi.service.http;version="1.2.1",
  org.osgi.util.tracker;version="1.5.1"
 Automatic-Module-Name: dictqueryweb
+Service-Component: OSGI-INF/component.xml
+Bundle-ActivationPolicy: lazy
